@@ -144,7 +144,7 @@ class Database extends Config
     //        'username'   => 'root',
     //        'password'   => 'root',
     //        'DBDriver'   => 'OCI8',
-    //        'DBPrefix'   => '',
+    //       se 'DBPrefix'   => '',
     //        'pConnect'   => false,
     //        'DBDebug'    => true,
     //        'charset'    => 'AL32UTF8',
