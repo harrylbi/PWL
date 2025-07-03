@@ -33,6 +33,13 @@
                     <span>Produk</span>
                 </a>
             </li><!-- End Produk Nav -->
+
+            <li class="nav-item">
+                <a class="nav-link <?= (uri_string() == 'diskon') ? "" : "collapsed" ?>" href="<?= base_url('diskon') ?>">
+                    <i class="bi bi-percent"></i>
+                    <span>Diskon</span>
+                </a>
+            </li><!-- End Diskon Nav -->
         <?php
         }
         ?>

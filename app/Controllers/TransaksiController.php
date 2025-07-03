@@ -77,11 +77,25 @@ class TransaksiController extends BaseController
 
     public function checkout()
     {
-    $data['items'] = $this->cart->contents();
-    $data['total'] = $this->cart->total();
+        // Ambil isi keranjang
+        $data['items'] = $this->cart->contents();
+        $data['total'] = $this->cart->total();
 
-    return view('v_checkout', $data);
+        // Tambahkan: Ambil diskon hari ini dari DB
+        $today = date('Y-m-d');
+        $diskonModel = new \App\Models\DiskonModel();
+        $diskonHariIni = $diskonModel->where('tanggal', $today)->first();
+
+        // Simpan ke session jika ditemukan
+        if ($diskonHariIni) {
+            session()->set('diskon', $diskonHariIni);
+        } else {
+            session()->remove('diskon');
+        }
+
+        return view('v_checkout', $data);
     }
+
 
     public function getLocation()
 {

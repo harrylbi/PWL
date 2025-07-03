@@ -8,7 +8,7 @@
         <?= form_input(['type' => 'hidden', 'name' => 'total_harga', 'id' => 'total_harga', 'value' => '']) ?>
         <div class="col-12">
             <label for="nama" class="form-label">Nama</label>
-            <input type="text" class="form-control" id="nama" value="<?php echo session()->get('username'); ?>">
+            <input type="text" class="form-control" id="nama" value="<?php echo session()->get('username'); ?>" readonly>
         </div>
         <div class="col-12">
             <label for="alamat" class="form-label">Alamat</label>
@@ -16,24 +16,21 @@
         </div> 
         <div class="col-12">
             <label for="kelurahan" class="form-label">Kelurahan</label>
-            <select class="form-control" id="kelurahan" name="kelurahan" required>
-            </select>
+            <select class="form-control" id="kelurahan" name="kelurahan" required></select>
         </div>
         <div class="col-12">
             <label for="layanan" class="form-label">Layanan</label>
-            <!-- <strong>select layanan</strong> -->
-            <select class="form-control" id="layanan" name="layanan" required>
-            </select>
+            <select class="form-control" id="layanan" name="layanan" required></select>
         </div>
         <div class="col-12">
             <label for="ongkir" class="form-label">Ongkir</label>
             <input type="text" class="form-control" id="ongkir" name="ongkir" readonly>
         </div>
     </div>
+
     <div class="col-lg-6">
-        <!-- Vertical Form -->
+        <!-- Tabel Produk -->
         <div class="col-12">
-            <!-- Default Table -->
             <table class="table">
                 <thead>
                     <tr>
@@ -45,41 +42,49 @@
                 </thead>
                 <tbody>
                     <?php
-                    $i = 1;
-                    if (!empty($items)) :
-                        foreach ($items as $index => $item) :
+                    $totalSetelahDiskon = 0;
+                    $nominalDiskon = session()->get('diskon')['nominal'] ?? 0;
                     ?>
-                            <tr>
-                                <td><?php echo $item['name'] ?></td>
-                                <td><?php echo number_to_currency($item['price'], 'IDR') ?></td>
-                                <td><?php echo $item['qty'] ?></td>
-                                <td><?php echo number_to_currency($item['price'] * $item['qty'], 'IDR') ?></td>
-                            </tr>
-                    <?php
-                        endforeach;
-                    endif;
-                    ?>
+                    <?php foreach ($items as $item) : ?>
+                        <?php
+                        $subTotal = $item['price'] * $item['qty'];
+                        $potongan = $nominalDiskon * $item['qty'];
+                        $subTotalSetelahDiskon = max(0, $subTotal - $potongan);
+                        $totalSetelahDiskon += $subTotalSetelahDiskon;
+                        ?>
+                        <tr>
+                            <td><?= $item['name'] ?></td>
+                            <td><?= number_to_currency($item['price'], 'IDR') ?></td>
+                            <td><?= $item['qty'] ?></td>
+                            <td>
+                                <?= number_to_currency($subTotalSetelahDiskon, 'IDR') ?>
+                                <?php if ($nominalDiskon > 0): ?>
+                                    <div class="text-muted small">Diskon: -<?= number_to_currency($potongan, 'IDR') ?></div>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
                     <tr>
                         <td colspan="2"></td>
                         <td>Subtotal</td>
-                        <td><?php echo number_to_currency($total, 'IDR') ?></td>
+                        <td><?= number_to_currency($totalSetelahDiskon, 'IDR') ?></td>
                     </tr>
                     <tr>
                         <td colspan="2"></td>
                         <td>Total</td>
-                        <td><span id="total"><?php echo number_to_currency($total, 'IDR') ?></span></td>
+                        <td><span id="total"><?= number_to_currency($totalSetelahDiskon, 'IDR') ?></span></td>
                     </tr>
                 </tbody>
             </table>
-            <!-- End Default Table Example -->
         </div>
         <div class="text-center">
             <button type="submit" class="btn btn-primary">Buat Pesanan</button>
         </div>
-        </form><!-- Vertical Form -->
+        </form>
     </div>
 </div>
 <?= $this->endSection() ?>
+
 <?= $this->section('script') ?>
 <script>
 $(document).ready(function() {
@@ -88,66 +93,63 @@ $(document).ready(function() {
     hitungTotal();
 
     $('#kelurahan').select2({
-    placeholder: 'Ketik nama kelurahan...',
-    ajax: {
-        url: '<?= base_url('get-location') ?>',
-        dataType: 'json',
-        delay: 1500,
-        data: function (params) {
-            return {
-                search: params.term
-            };
-        },
-        processResults: function (data) {
-            return {
-                results: data.map(function(item) {
+        placeholder: 'Ketik nama kelurahan...',
+        ajax: {
+            url: '<?= base_url('get-location') ?>',
+            dataType: 'json',
+            delay: 1500,
+            data: function (params) {
                 return {
-                    id: item.id,
-                    text: item.subdistrict_name + ", " + item.district_name + ", " + item.city_name + ", " + item.province_name + ", " + item.zip_code
+                    search: params.term
                 };
-                })
-            };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(function(item) {
+                        return {
+                            id: item.id,
+                            text: item.subdistrict_name + ", " + item.district_name + ", " + item.city_name + ", " + item.province_name + ", " + item.zip_code
+                        };
+                    })
+                };
+            },
+            cache: true
         },
-        cache: true
-    },
-    minimumInputLength: 3
-});
-
-$("#kelurahan").on('change', function() {
-    var id_kelurahan = $(this).val(); 
-    $("#layanan").empty();
-    ongkir = 0;
-
-    $.ajax({
-        url: "<?= site_url('get-cost') ?>",
-        type: 'GET',
-        data: { 
-            'destination': id_kelurahan, 
-        },
-        dataType: 'json',
-        success: function(data) { 
-            data.forEach(function(item) {
-                var text = item["description"] + " (" + item["service"] + ") : estimasi " + item["etd"] + "";
-                $("#layanan").append($('<option>', {
-                    value: item["cost"],
-                    text: text 
-                }));
-            });
-            hitungTotal(); 
-        },
+        minimumInputLength: 3
     });
-});
+
+    $("#kelurahan").on('change', function() {
+        var id_kelurahan = $(this).val(); 
+        $("#layanan").empty();
+        ongkir = 0;
+
+        $.ajax({
+            url: "<?= site_url('get-cost') ?>",
+            type: 'GET',
+            data: { 'destination': id_kelurahan },
+            dataType: 'json',
+            success: function(data) { 
+                data.forEach(function(item) {
+                    var text = item["description"] + " (" + item["service"] + ") : estimasi " + item["etd"] + "";
+                    $("#layanan").append($('<option>', {
+                        value: item["cost"],
+                        text: text 
+                    }));
+                });
+                hitungTotal(); 
+            },
+        });
+    });
 
     $("#layanan").on('change', function() {
-    ongkir = parseInt($(this).val());
-    hitungTotal();
-});  
+        ongkir = parseInt($(this).val());
+        hitungTotal();
+    });
 
     function hitungTotal() {
-        total = ongkir + <?= $total ?>;
-
+        total = ongkir + <?= $totalSetelahDiskon ?>;
         $("#ongkir").val(ongkir);
-        $("#total").html("IDR " + total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
+        $("#total").html("IDR " + total.toLocaleString("id-ID"));
         $("#total_harga").val(total);
     }
 });

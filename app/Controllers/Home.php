@@ -1,46 +1,33 @@
 <?php
 
 namespace App\Controllers;
-use App\Models\ProductModel; 
-use App\Models\TransactionModel; 
-use App\Models\TransactionDetailModel; 
 
+use App\Models\ProductModel;
+use App\Models\TransactionModel;
+use App\Models\TransactionDetailModel;
 
 class Home extends BaseController
-
 {
-
     protected $product;
     protected $transaction;
     protected $transaction_detail;
 
-
-
-
-    function __construct(){
+    public function __construct()
+    {
         helper('number');
         helper('form');
-        
+
         $this->product = new ProductModel();
         $this->transaction = new TransactionModel();
         $this->transaction_detail = new TransactionDetailModel();
-        
     }
 
     public function index(): string
-    {   
+    {
         $product = $this->product->findAll();
         $data['product'] = $product;
         return view('v_home', $data);
     }
-
-    // public function index (){
-    //     $product = $this->product->findAll();
-    //     $data['product'] = $product;
-
-    //     return view('v_home', $data);
-
-    // }
 
     public function profile()
     {
@@ -54,7 +41,11 @@ class Home extends BaseController
 
         if (!empty($buy)) {
             foreach ($buy as $item) {
-                $detail = $this->transaction_detail->select('transaction_detail.*, product.nama, product.harga, product.foto')->join('product', 'transaction_detail.product_id=product.id')->where('transaction_id', $item['id'])->findAll();
+                $detail = $this->transaction_detail
+                    ->select('transaction_detail.*, product.nama, product.harga, product.foto, transaction_detail.diskon')
+                    ->join('product', 'transaction_detail.product_id = product.id')
+                    ->where('transaction_id', $item['id'])
+                    ->findAll();
 
                 if (!empty($detail)) {
                     $product[$item['id']] = $detail;

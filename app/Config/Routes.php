@@ -53,3 +53,13 @@ $routes->get('faq', 'FaqController::index', ['filter' => 'auth']);
 $routes->get('profile', 'Home::profile', ['filter' => 'auth']);
 
 $routes->resource('api', ['controller' => 'apiController']);
+
+
+$routes->group('', ['filter' => 'auth'], function($routes) {
+    $routes->get('/diskon', 'DiskonController::index');
+    $routes->get('/diskon/create', 'DiskonController::create');
+    $routes->post('/diskon/store', 'DiskonController::store');
+    $routes->get('/diskon/edit/(:num)', 'DiskonController::edit/$1');
+    $routes->post('/diskon/update/(:num)', 'DiskonController::update/$1');
+    $routes->get('/diskon/delete/(:num)', 'DiskonController::delete/$1');
+});
