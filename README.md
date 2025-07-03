@@ -191,11 +191,3 @@ Proyek ini adalah aplikasi toko online yang dibangun menggunakan [CodeIgniter 4]
 | User  | `user1`  | `123456` |
 
 ---
-
-## 📄 Lisensi
-
-Proyek ini menggunakan lisensi [MIT](LICENSE).
-
----
-
-Jika kamu ingin saya bantu generate file `README.md` lengkap versi ini atau menyesuaikan dengan screenshot & nama repo kamu, tinggal beri tahu ya!
