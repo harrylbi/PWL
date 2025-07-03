@@ -28,7 +28,7 @@ class ApiController extends ResourceController
      *
      * @return ResponseInterface
      */
-    public function index()
+ public function index()
     {
         $data = [ 
             'results' => [],
@@ -41,19 +41,29 @@ class ApiController extends ResourceController
             $value = $value->getValue();
         });
 
-        if(array_key_exists("Key", $headers)){
-            if ($headers["Key"] == $this->apiKey) {
-                $penjualan = $this->transaction->findAll();
-                
-                foreach ($penjualan as &$pj) {
-                    $pj['details'] = $this->transaction_detail->where('transaction_id', $pj['id'])->findAll();
+        if (array_key_exists("Key", $headers) && $headers["Key"] == $this->apiKey) {
+
+            $penjualan = $this->transaction->findAll();
+
+            foreach ($penjualan as &$pj) {
+                $details = $this->transaction_detail->where('transaction_id', $pj['id'])->findAll();
+
+                // Hitung jumlah item
+                $jumlah_item = 0;
+                foreach ($details as $d) {
+                    $jumlah_item += (int)$d['jumlah'];
                 }
 
-                $data['status'] = ["code" => 200, "description" => "OK"];
-                $data['results'] = $penjualan;
-
+                // Tambahkan field yang diperlukan untuk tampilan dashboard
+                $pj['jumlah_item'] = $jumlah_item;
+                $pj['details'] = $details;
+                $pj['tanggal_transaksi'] = $pj['created_at'] ?? null; // alias agar konsisten
+                $pj['status'] = $pj['status'] ?? '0'; // default jika tidak ada status
             }
-        } 
+
+            $data['status'] = ["code" => 200, "description" => "OK"];
+            $data['results'] = $penjualan;
+        }
 
         return $this->respond($data);
     }
