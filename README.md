@@ -1,7 +1,3 @@
-Berikut adalah **README** proyek toko online CodeIgniter 4 versi lengkap dan profesional, dengan struktur yang rapi serta penambahan detail:
-
----
-
 # 🛒 Toko Online CodeIgniter 4
 
 Proyek ini adalah aplikasi toko online yang dibangun menggunakan [CodeIgniter 4](https://codeigniter.com/). Aplikasi ini menyediakan fitur lengkap untuk **pengelolaan produk**, **keranjang belanja**, **sistem transaksi**, serta **dashboard admin** yang responsif menggunakan template **NiceAdmin**.
