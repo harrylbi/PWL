@@ -179,11 +179,4 @@ Proyek ini adalah aplikasi toko online yang dibangun menggunakan [CodeIgniter 4]
 
 ---
 
-## 🔐 Akun Default
-
-| Role  | Username | Password |
-| ----- | -------- | -------- |
-| Admin | `admin`  | `123456` |
-| User  | `user1`  | `123456` |
-
 ---
